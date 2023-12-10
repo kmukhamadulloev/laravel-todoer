@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreNoteRequest;
 use App\Http\Requests\UpdateNoteRequest;
+use App\Http\Resources\NoteResource;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Note;
 
 class NoteController extends Controller
@@ -14,7 +16,8 @@ class NoteController extends Controller
      */
     public function index()
     {
-        //
+        $user = Auth::user();
+        return $this->sendResponse("Request done.", new NoteResource($user));
     }
 
     /**
@@ -22,7 +25,11 @@ class NoteController extends Controller
      */
     public function store(StoreNoteRequest $request)
     {
-        //
+        $user = Auth::user();
+        $note = $user->notes()->create($request->validated());
+        return $this->sendResponse("Note created successfully.", [
+            'note' => $note
+        ]);
     }
 
     /**
@@ -30,7 +37,8 @@ class NoteController extends Controller
      */
     public function show(Note $note)
     {
-        //
+        $this->authorize('view', $note);
+        return $this->sendResponse("Request done successfully.", $note);
     }
 
     /**
@@ -38,7 +46,9 @@ class NoteController extends Controller
      */
     public function update(UpdateNoteRequest $request, Note $note)
     {
-        //
+        $this->authorize('update', $note);
+        $note->update($request->validated());
+        return $this->sendResponse("Task updated successfully.");
     }
 
     /**
@@ -46,6 +56,8 @@ class NoteController extends Controller
      */
     public function destroy(Note $note)
     {
-        //
+        $this->authorize('update', $note);
+        $note->delete();
+        return $this->sendResponse("Note deleted successfully.");
     }
 }

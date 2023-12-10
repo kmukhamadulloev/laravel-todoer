@@ -12,12 +12,14 @@ class NoteCollection extends ResourceCollection
      *
      * @return array<int|string, mixed>
      */
-    public function toArray(Request $request): array
+    public function toArray(Request $request)
     {
-        return [
-            'id' => $this->id,
-            'title' => $this->title,
-            'done' => $this->done
-        ];
+        return $this->collection->map(function ($task) {
+            return [
+                'id' => $task->id,
+                'title' => $task->title,
+                'done' => $task->done,
+            ];
+        });
     }
 }
